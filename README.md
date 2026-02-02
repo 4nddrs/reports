@@ -1,5 +1,7 @@
 # JW Reports System
 
+![JW Reports System](images/1.png)
+
 A comprehensive Flask-based web application for managing and tracking ministry reports for Jehovah's Witnesses congregation groups. This system allows group overseers to track publisher activities, generate monthly reports, and export data in multiple formats.
 
 ## Table of Contents
