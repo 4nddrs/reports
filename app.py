@@ -439,8 +439,8 @@ def export_pdf(grupo_id, mes, year):
         # Total general
         elements.append(Spacer(1, 10))
         total_data = [
-            ['Total General de Horas (sin Publicadores)', str(total_general)],
-            ['Total General de Estudios', str(total_estudios_general)]
+            ['Total de Horas', str(total_general)],
+            ['Total de Estudios', str(total_estudios_general)]
         ]
         total_table = Table(total_data, colWidths=[4*inch, 1.5*inch])
         total_table.setStyle(TableStyle([

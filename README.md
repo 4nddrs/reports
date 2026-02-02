@@ -263,6 +263,130 @@ For production deployment, consider:
 - Setting `FLASK_ENV=production` and `FLASK_DEBUG=False`
 - Using a production-grade WSGI server
 
+## Deployment
+
+### Fly.io Deployment
+
+This application is configured for deployment on [Fly.io](https://fly.io), a platform for running full-stack apps globally.
+
+#### Prerequisites
+
+1. Install the Fly CLI:
+   ```bash
+   # macOS/Linux
+   curl -L https://fly.io/install.sh | sh
+   
+   # Windows (PowerShell)
+   iwr https://fly.io/install.ps1 -useb | iex
+   ```
+
+2. Sign up and log in:
+   ```bash
+   fly auth signup
+   # or
+   fly auth login
+   ```
+
+#### Initial Setup
+
+1. Launch the app (first time only):
+   ```bash
+   fly launch
+   ```
+   This will:
+   - Create a `fly.toml` configuration file
+   - Set up your app on Fly.io
+   - Configure the region and resources
+
+2. Set your Firebase environment variables as secrets:
+   ```bash
+   fly secrets set FIREBASE_TYPE=service_account
+   fly secrets set FIREBASE_PROJECT_ID=your-project-id
+   fly secrets set FIREBASE_PRIVATE_KEY_ID=your-private-key-id
+   fly secrets set FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour-Private-Key\n-----END PRIVATE KEY-----\n"
+   fly secrets set FIREBASE_CLIENT_EMAIL=your-service-account@your-project.iam.gserviceaccount.com
+   fly secrets set FIREBASE_CLIENT_ID=your-client-id
+   fly secrets set FIREBASE_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+   fly secrets set FIREBASE_TOKEN_URI=https://oauth2.googleapis.com/token
+   fly secrets set FIREBASE_AUTH_PROVIDER_X509_CERT_URL=https://www.googleapis.com/oauth2/v1/certs
+   fly secrets set FIREBASE_CLIENT_X509_CERT_URL=your-cert-url
+   fly secrets set SECRET_KEY=your-random-secret-key
+   ```
+
+#### Manual Deployment
+
+Deploy manually at any time:
+```bash
+fly deploy
+```
+
+#### Continuous Deployment with GitHub Actions
+
+The project includes a GitHub Actions workflow (`.github/workflows/fly-deploy.yml`) that automatically deploys to Fly.io when you push to the `main` branch.
+
+**Setup Steps:**
+
+1. Get your Fly.io API token:
+   ```bash
+   fly auth token
+   ```
+
+2. Add the token to your GitHub repository:
+   - Go to your repository on GitHub
+   - Navigate to **Settings** > **Secrets and variables** > **Actions**
+   - Click **New repository secret**
+   - Name: `FLY_API_TOKEN`
+   - Value: (paste your token)
+
+3. Push to `main` branch:
+   ```bash
+   git push origin main
+   ```
+
+The GitHub Action will automatically build and deploy your application.
+
+#### Fly.io Configuration
+
+The `fly.toml` file contains the deployment configuration:
+
+- **App Name**: `jwreports`
+- **Region**: `gru` (São Paulo, Brazil)
+- **Port**: 8080 (internal)
+- **HTTPS**: Forced
+- **Auto-scaling**: Enabled (stops when inactive, starts on request)
+- **Resources**: 1GB RAM, 1 shared CPU
+
+#### Dockerfile
+
+The application uses a multi-stage Docker build:
+- Base image: `python:3.12-slim`
+- Installs dependencies from `requirements.txt`
+- Exposes port 8080
+- Runs with Gunicorn: `gunicorn -b 0.0.0.0:8080 app:app`
+
+#### Useful Fly.io Commands
+
+```bash
+# Check app status
+fly status
+
+# View logs
+fly logs
+
+# Open the app in browser
+fly open
+
+# SSH into the running machine
+fly ssh console
+
+# Check secrets
+fly secrets list
+
+# Scale resources
+fly scale memory 512  # Set to 512MB
+fly scale count 2     # Run 2 instances
+```
+
 ## API Documentation
 
 ### Groups
@@ -480,6 +604,12 @@ app/
 ├── .gitignore                # Git ignore rules
 ├── key.json                  # Firebase credentials (not in git)
 ├── README.md                 # This file
+├── Dockerfile                # Docker configuration for Fly.io
+├── fly.toml                  # Fly.io deployment configuration
+├── .dockerignore             # Docker ignore rules
+├── .github/
+│   └── workflows/
+│       └── fly-deploy.yml    # GitHub Actions CI/CD workflow
 ├── templates/
 │   └── index.html            # Main HTML template
 └── static/
@@ -532,5 +662,5 @@ For issues, questions, or contributions, please contact the system administrator
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** February 2024
+**Version:** 1.1.0  
+**Last Updated:** February 2026

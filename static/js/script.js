@@ -394,12 +394,14 @@ function crearPersonaCard(persona, index) {
     let participo = true;
     let estudiosActuales = 0;
     let comentarioActual = '';
+    let tieneRegistro = false;
     
     if (persona.hours) {
         const horasMes = persona.hours.find(h => 
             h.month === mesSeleccionado && h.year === yearSeleccionado
         );
         if (horasMes) {
+            tieneRegistro = true;
             horasActuales = horasMes.hours || 0;
             participo = horasMes.Participo !== undefined ? horasMes.Participo : true;
             estudiosActuales = horasMes.estudios || 0;
@@ -515,6 +517,7 @@ function crearPersonaCard(persona, index) {
                 <h4>${persona.name || 'Sin nombre'}</h4>
                 <span class="badge">${state}</span>
             </div>
+            ${tieneRegistro ? '<div class="registro-check" title="Informe ya registrado"><i class="fas fa-check-circle"></i></div>' : ''}
         </div>
         <div class="persona-fields">
             ${camposHTML}
@@ -593,6 +596,16 @@ async function guardarPersona(personaId) {
                     personasData[personaIndex].hours[horasIndex] = hoursData;
                 } else {
                     personasData[personaIndex].hours.push(hoursData);
+                }
+                
+                // Recrear la tarjeta para mostrar el check actualizado
+                const container = document.getElementById('personas-container');
+                const cards = container.querySelectorAll('.persona-card');
+                const cardIndex = Array.from(cards).findIndex(card => card.querySelector(`#state-${personaId}`));
+                
+                if (cardIndex !== -1) {
+                    const newCard = crearPersonaCard(personasData[personaIndex], cardIndex);
+                    cards[cardIndex].replaceWith(newCard);
                 }
             }
         } else {
