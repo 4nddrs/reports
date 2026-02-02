@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Informes</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon/favicon-96x96.png') }}" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon/favicon.svg') }}" />
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon/favicon.ico') }}" />
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon/apple-touch-icon.png') }}" />
+    <meta name="apple-mobile-web-app-title" content="JW reports" />
+    <link rel="manifest" href="{{ url_for('static', filename='favicon/site.webmanifest') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <i class="fas fa-chart-line"></i>
+                <h1>Sistema de Informes</h1>
+            </div>
+        </header>
+
+        <!-- Menú Principal -->
+        <section id="menu-section" class="section active">
+            <div class="section-header">
+                <h2>Menú Principal</h2>
+                <p>Selecciona una opción</p>
+            </div>
+            <div class="menu-grid">
+                <div class="menu-card" onclick="irAGrupos()">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>Grupos</h3>
+                    <p>Crear informes mensuales</p>
+                </div>
+                <div class="menu-card" onclick="irAAdministracion()">
+                    <i class="fas fa-users-cog"></i>
+                    <h3>Administración</h3>
+                    <p>Gestionar personas y datos</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Selección de Grupo -->
+        <section id="grupo-section" class="section">
+            <div class="section-header">
+                <button class="btn-back" onclick="volverMenu()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <h2>Seleccionar Grupo</h2>
+                <p>Elige el grupo para crear el informe</p>
+            </div>
+            <div class="grupos-grid" id="grupos-grid">
+                <!-- Los grupos se cargarán dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Selección de Mes -->
+        <section id="mes-section" class="section">
+            <div class="section-header">
+                <button class="btn-back" onclick="volverGrupos()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <h2 id="grupo-titulo"></h2>
+            </div>
+            <div class="mes-container">
+                <h3>Crear Informe del Mes</h3>
+                <div class="form-group">
+                    <label for="mes-select">
+                        <i class="fas fa-calendar-alt"></i> Seleccionar Mes
+                    </label>
+                    <select id="mes-select" class="input-select">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="cargarPersonas()">
+                    Continuar <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Lista de Personas -->
+        <section id="personas-section" class="section">
+            <div class="section-header">
+                <button class="btn-back" onclick="volverMes()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <h2 id="personas-titulo"></h2>
+                <p id="mes-seleccionado"></p>
+            </div>
+            
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input 
+                    type="text" 
+                    id="personas-search" 
+                    class="search-input" 
+                    placeholder="Buscar por nombre..."
+                    onkeyup="filtrarPersonas()"
+                >
+            </div>
+
+            <div class="personas-container" id="personas-container">
+                <!-- Las personas se cargarán dinámicamente -->
+            </div>
+
+            <div class="export-buttons">
+                <button class="btn-export btn-excel" onclick="exportarExcel()">
+                    <i class="fas fa-file-excel"></i> Exportar a Excel
+                </button>
+                <button class="btn-export btn-pdf" onclick="exportarPDF()">
+                    <i class="fas fa-file-pdf"></i> Exportar a PDF
+                </button>
+            </div>
+        </section>
+
+        <!-- Administración - Selección de Grupo -->
+        <section id="admin-grupo-section" class="section">
+            <div class="section-header">
+                <button class="btn-back" onclick="volverMenu()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <h2>Administración de Publicadores</h2>
+                <p>Gestionar todos los publicadores</p>
+            </div>
+            
+            <div class="admin-actions">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input 
+                        type="text" 
+                        id="admin-search-all" 
+                        class="search-input" 
+                        placeholder="Buscar por nombre..."
+                        onkeyup="filtrarPublishersAdmin()"
+                    >
+                </div>
+                <button class="btn-add-new" onclick="mostrarFormularioNuevo()">
+                    <i class="fas fa-plus-circle"></i> Nuevo Publicador
+                </button>
+            </div>
+
+            <div class="admin-personas-container" id="admin-all-personas-container">
+                <!-- Los publicadores se cargarán dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Administración - Lista de Personas -->
+        <section id="admin-personas-section" class="section" style="display: none;">
+            <div class="section-header">
+                <button class="btn-back" onclick="volverAdminGrupos()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <h2 id="admin-grupo-titulo"></h2>
+                <p>Gestionar personas del grupo</p>
+            </div>
+                        <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input 
+                    type="text" 
+                    id="admin-search" 
+                    class="search-input" 
+                    placeholder="Buscar por nombre..."
+                    onkeyup="filtrarPersonasAdmin()"
+                >
+            </div>
+            <div class="admin-personas-container" id="admin-personas-container">
+                <!-- Las personas se cargarán dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Modal para Crear Nuevo Publicador -->
+        <div id="modal-nuevo" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-user-plus"></i> Nuevo Publicador</h3>
+                    <button class="btn-close-modal" onclick="cerrarModalNuevo()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Nombre</label>
+                        <input type="text" id="nuevo-name" class="input-text" placeholder="Nombre completo">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-layer-group"></i> Grupo ID</label>
+                        <select id="nuevo-groupid" class="input-select-small">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-user-tag"></i> Estado</label>
+                        <select id="nuevo-state" class="input-select-small">
+                            <option value="Publicador">Publicador</option>
+                            <option value="Precursor Auxiliar">Precursor Auxiliar</option>
+                            <option value="Precursor Auxiliar Indefinido">Precursor Auxiliar Indefinido</option>
+                            <option value="Precursor Regular">Precursor Regular</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick="cerrarModalNuevo()">Cancelar</button>
+                    <button class="btn-save-modal" onclick="crearNuevoPublisher()">
+                        <i class="fas fa-save"></i> Crear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Confirmar Eliminación -->
+        <div id="modal-confirmar" class="modal">
+            <div class="modal-content modal-confirm">
+                <div class="modal-confirm-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="modal-confirm-body">
+                    <h3>¿Estás seguro?</h3>
+                    <p id="confirm-message">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-confirm-footer">
+                    <button class="btn-cancel" onclick="cerrarModalConfirmar()">Cancelar</button>
+                    <button class="btn-confirm-delete" id="btn-confirm-action">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Cargando...</p>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast">
+            <i class="fas fa-check-circle"></i>
+            <span id="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
