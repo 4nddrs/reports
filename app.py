@@ -383,20 +383,29 @@ def export_pdf(grupo_id, mes, year):
                 
                 # Datos de la tabla
                 if estado == 'Publicador':
-                    # Para publicadores: nombre y participó
-                    data = [['Nombre', 'Participó']]
+                    # Para publicadores: nombre, participó, estudios y comentario
+                    data = [['Nombre', 'Participó', 'Estudios', 'Comentario']]
                     total_participo = 0
+                    total_estudios_publicadores = 0
                     
                     for persona in reporte[estado]:
                         participo_text = 'Sí' if persona['participo'] else 'No'
-                        data.append([persona['nombre'], participo_text])
+                        comentario_text = persona['comentario'][:30] + '...' if len(persona['comentario']) > 30 else persona['comentario']
+                        data.append([
+                            persona['nombre'], 
+                            participo_text,
+                            str(persona['estudios']),
+                            comentario_text
+                        ])
                         if persona['participo']:
                             total_participo += 1
+                        total_estudios_publicadores += persona['estudios']
                     
-                    data.append(['Total Participaron', str(total_participo)])
+                    data.append(['Total Participaron / Estudios', str(total_participo), str(total_estudios_publicadores), ''])
+                    total_estudios_general += total_estudios_publicadores
                     
                     # Crear tabla
-                    table = Table(data, colWidths=[4*inch, 1.5*inch])
+                    table = Table(data, colWidths=[2.5*inch, 1*inch, 1*inch, 2*inch])
                 else:
                     # Para otros: nombre, horas, estudios, comentario
                     data = [['Nombre', 'Horas', 'Estudios', 'Comentario']]
@@ -575,27 +584,36 @@ def export_excel(grupo_id, mes, year):
             if reporte[estado]:
                 # Título del estado
                 if estado == 'Publicador':
-                    worksheet.merge_range(row, 0, row, 1, estado, subtitle_format)
+                    worksheet.merge_range(row, 0, row, 3, estado, subtitle_format)
                     row += 1
                     
                     # Headers para Publicadores
                     worksheet.write(row, 0, 'Nombre', header_format)
                     worksheet.write(row, 1, 'Participó', header_format)
+                    worksheet.write(row, 2, 'Estudios', header_format)
+                    worksheet.write(row, 3, 'Comentario', header_format)
                     row += 1
                     
                     # Datos
                     total_participo = 0
+                    total_estudios_publicadores = 0
                     for persona in reporte[estado]:
                         worksheet.write(row, 0, persona['nombre'], cell_format)
                         participo_text = 'Sí' if persona['participo'] else 'No'
                         worksheet.write(row, 1, participo_text, cell_format)
+                        worksheet.write(row, 2, persona['estudios'], cell_format)
+                        worksheet.write(row, 3, persona['comentario'], cell_format)
                         if persona['participo']:
                             total_participo += 1
+                        total_estudios_publicadores += persona['estudios']
                         row += 1
                     
                     # Total del estado
-                    worksheet.write(row, 0, 'Total Participaron', total_format)
+                    worksheet.write(row, 0, 'Total Participaron / Estudios', total_format)
                     worksheet.write(row, 1, total_participo, total_format)
+                    worksheet.write(row, 2, total_estudios_publicadores, total_format)
+                    worksheet.write(row, 3, '', total_format)
+                    total_estudios_general += total_estudios_publicadores
                     row += 2
                 else:
                     worksheet.merge_range(row, 0, row, 4, estado, subtitle_format)
@@ -634,7 +652,7 @@ def export_excel(grupo_id, mes, year):
                     row += 2
         
         # Total general
-        worksheet.write(row, 0, 'Total General de Horas (sin Publicadores)', total_general_format)
+        worksheet.write(row, 0, 'Total General de Horas', total_general_format)
         worksheet.write(row, 1, total_general, total_general_format)
         worksheet.write(row, 2, '', total_general_format)
         worksheet.write(row, 3, '', total_general_format)
